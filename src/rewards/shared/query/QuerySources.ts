@@ -427,40 +427,59 @@ export class QuerySources {
         }
     }
     
-    async getGmyaTopics(platform: string, appkey: string, language = 'zh'): Promise<QueryTopic[]> {
-        const origin: QueryOrigin = {
-            source: `gmya.${platform}`,
-            sourceUrl: `https://api.gmya.net/Api/${platform}`,
-            language,
-            country: 'CN'
-        }
-        try {
-            const response = await this.bot.http.request<{
-                code: number
-                data?: { title: string }[]
-            }>({
-                url: origin.sourceUrl,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `format=json&appkey=${appkey}`,
-                timeout: 8000,
-                retries: 0
-            }, this.bot.config.proxy.queryEngine)
-
-            if (response.data.code !== 200 || !Array.isArray(response.data.data)) return []
-            
-            return response.data.data
-                .filter(item => item.title?.trim())
-                .map((item, sourceRank) => ({
-                    text: cleanQuery(item.title, true),
-                    ...origin,
-                    kind: 'trend',
-                    sourceRank
-                }))
-        } catch (error) {
-            this.bot.logger.debug(this.bot.isMobile, 'SEARCH-GMYA', `Request failed | ${String(error)}`)
+    async getGmyaTopics(platforms: string[], appkey: string, language = 'zh'): Promise<QueryTopic[]> {
+        if (!appkey) {
+            this.bot.logger.warn(this.bot.isMobile, 'SEARCH-GMYA', 'GMYA_APPKEY is not set in .env')
             return []
         }
+
+        // 并发请求所有配置的平台
+        const jobs = platforms.map(async (platform) => {
+            const origin: QueryOrigin = {
+                source: `gmya.${platform}`,
+                sourceUrl: `https://api.gmya.net/Api/${platform}`,
+                language,
+                country: 'CN'
+            }
+
+            try {
+                const response = await this.bot.http.request<{
+                    code: number
+                    data?: { title: string }[]
+                }>({
+                    url: origin.sourceUrl,
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `format=json&appkey=${appkey}`,
+                    timeout: 8000,
+                    retries: 0
+                }, this.bot.config.proxy.queryEngine)
+
+                if (response.data.code !== 200 || !Array.isArray(response.data.data)) {
+                    throw new Error(`API error: code=${response.data.code}`)
+                }
+                
+                return response.data.data
+                    .filter(item => item.title?.trim())
+                    .map((item, sourceRank) => ({
+                        text: cleanQuery(item.title, true),
+                        ...origin,
+                        kind: 'trend',
+                        sourceRank
+                    }))
+            } catch (error) {
+                this.bot.logger.debug(this.bot.isMobile, 'SEARCH-GMYA', `Request failed | platform=${platform} | ${String(error)}`)
+                return []
+            }
+        })
+
+        // 等待所有请求结束，失败的平台返回空数组，成功的平台正常返回
+        const results = await Promise.allSettled(jobs)
+        
+        // 合并所有成功平台的词条
+        return results
+            .filter((r): r is PromiseFulfilledResult<QueryTopic[]> => r.status === 'fulfilled')
+            .flatMap(r => r.value)
     }
 
     async getWikihowTopics(language = 'zh'): Promise<QueryTopic[]> {
