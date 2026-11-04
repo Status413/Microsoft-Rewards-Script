@@ -426,4 +426,62 @@ export class QuerySources {
             return []
         }
     }
+    
+    async getGmyaTopics(platform: string, appkey: string, language = 'zh'): Promise<QueryTopic[]> {
+        const origin: QueryOrigin = {
+            source: `gmya.${platform}`,
+            sourceUrl: `https://api.gmya.net/Api/${platform}`,
+            language,
+            country: 'CN'
+        }
+        try {
+            const response = await this.bot.http.request<{
+                code: number
+                data?: { title: string }[]
+            }>({
+                url: origin.sourceUrl,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `format=json&appkey=${appkey}`,
+                timeout: 8000,
+                retries: 0
+            }, this.bot.config.proxy.queryEngine)
+
+            if (response.data.code !== 200 || !Array.isArray(response.data.data)) return []
+            
+            return response.data.data
+                .filter(item => item.title?.trim())
+                .map((item, sourceRank) => ({
+                    text: cleanQuery(item.title, true),
+                    ...origin,
+                    kind: 'trend',
+                    sourceRank
+                }))
+        } catch (error) {
+            this.bot.logger.debug(this.bot.isMobile, 'SEARCH-GMYA', `Request failed | ${String(error)}`)
+            return []
+        }
+    }
+
+    async getWikihowTopics(language = 'zh'): Promise<QueryTopic[]> {
+        const origin: QueryOrigin = {
+            source: 'wikihow',
+            sourceUrl: 'https://zh.wikihow.com/api.php?action=app&subcmd=featured&num=40&format=json',
+            language
+        }
+        try {
+            const response = await this.request<{ title: string }[]>(origin)
+            return (response.data || [])
+                .filter(item => item.title?.trim())
+                .map((item, sourceRank) => ({
+                    text: cleanQuery(item.title, false),
+                    ...origin,
+                    kind: 'evergreen',
+                    sourceRank
+                }))
+        } catch (error) {
+            this.bot.logger.debug(this.bot.isMobile, 'SEARCH-WIKIHOW', `Request failed | ${String(error)}`)
+            return []
+        }
+    }
 }
