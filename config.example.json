@@ -45,7 +45,8 @@
         "parallelSearching": true,
         "clusterSearch": true,
         "useAccountLocale": true,
-        "queryEngines": ["google", "local", "wikipedia", "rss.googleNews"],
+        "queryEngines": ["google", "gmya", "wikihow", "local", "wikipedia", "rss.googleNews"],
+        "gmyaPlatforms": ["BaiduHot", "TouTiaoHot", "WeiBoHot", "SoHot"]
         "searchResultVisitTime": "10sec",
         "searchDelay": {
             "min": "30sec",
