@@ -41,6 +41,12 @@ export class QueryEngine {
             wikirandom: () => this.sources.getWikipediaRandom(language),
             hackernews: () => this.sources.getHackerNewsTopics(),
             reddit: () => this.sources.getRedditTopics(),
+            gmya: () => this.sources.getGmyaTopics(
+                this.bot.config.searchSettings.gmyaPlatform || 'BaiduHot', 
+                process.env.GMYA_APPKEY || '', 
+                language
+            ),
+            wikihow: () => this.sources.getWikihowTopics(language),
             local: () => this.sources.getLocalQueryList(language)
         }
         const selected = [...new Set(sourceOrder)]
