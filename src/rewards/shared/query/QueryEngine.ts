@@ -42,7 +42,7 @@ export class QueryEngine {
             hackernews: () => this.sources.getHackerNewsTopics(),
             reddit: () => this.sources.getRedditTopics(),
             gmya: () => this.sources.getGmyaTopics(
-                this.bot.config.searchSettings.gmyaPlatform || 'BaiduHot', 
+                this.bot.config.searchSettings.gmyaPlatforms || ['BaiduHot'], 
                 process.env.GMYA_APPKEY || '', 
                 language
             ),
