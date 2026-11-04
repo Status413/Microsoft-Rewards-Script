@@ -447,10 +447,8 @@ export class QuerySources {
                     code: number
                     data?: { title: string }[]
                 }>({
-                    url: origin.sourceUrl,
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `format=json&appkey=${appkey}`,
+                    url: `${origin.sourceUrl}?format=json&appkey=${appkey}`,
+                    method: 'GET',
                     timeout: 8000,
                     retries: 0
                 }, this.bot.config.proxy.queryEngine)
@@ -493,7 +491,7 @@ export class QuerySources {
             return (response.data || [])
                 .filter(item => item.title?.trim())
                 .map((item, sourceRank) => ({
-                    text: cleanQuery(item.title, false),
+                    text: cleanQuery(item.title, false) || '',
                     ...origin,
                     kind: 'evergreen',
                     sourceRank

@@ -39,6 +39,7 @@ export interface ConfigSearchSettings {
     clusterSearch: boolean
     useAccountLocale: boolean
     queryEngines: QueryEngineEntry[]
+    gmyaPlatforms?: string[]
     searchResultVisitTime: number | string
     searchDelay: ConfigDelay
     readDelay: ConfigDelay
