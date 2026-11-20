@@ -62,7 +62,7 @@ const DelaySchema = z
     })
 
 const QueryEngineSchema = z.union([
-    z.enum(['google', 'wikipedia', 'wikirandom', 'hackernews', 'reddit', 'local']),
+    z.enum(['google', 'wikipedia', 'wikirandom', 'hackernews', 'reddit', 'gmya', 'wikihow', 'local']),
     z
         .string()
         .regex(/^rss(\.[A-Za-z0-9_-]+){0,2}$/, 'Invalid rss selector (use rss, rss.<site>, or rss.<site>.<endpoint>)')
@@ -172,6 +172,7 @@ const ConfigSchema = z.strictObject({
         clusterSearch: z.boolean().default(defaultConfig.searchSettings.clusterSearch),
         useAccountLocale: z.boolean().default(defaultConfig.searchSettings.useAccountLocale),
         queryEngines: z.array(QueryEngineSchema).min(1),
+        gmyaPlatforms: z.array(z.string()).optional(),
         searchResultVisitTime: DurationValue,
         searchDelay: DelaySchema,
         readDelay: DelaySchema
