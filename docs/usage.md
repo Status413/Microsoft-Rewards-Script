@@ -336,7 +336,8 @@ Set these fields inside `searchSettings`.
 | `runOnZeroPoints`         | `false`                                              | Allow bounded searches when no search points remain.            | `CONFIG_SEARCH_RUN_ON_ZERO_POINTS`                              |
 | `clusterSearch`           | `true`                                               | Add related Bing suggestions to each topic.                     | `CONFIG_SEARCH_CLUSTER`                                         |
 | `useAccountLocale`        | `true`                                               | Prefer query language/country derived from the account country. | `CONFIG_SEARCH_USE_ACCOUNT_LOCALE`                              |
-| `queryEngines`            | `["google", "local", "wikipedia", "rss.googleNews"]` | Topic sources; at least one.                                    | `CONFIG_SEARCH_QUERY_ENGINES`                                   |
+| `queryEngines`            | `["google", "local", "wikipedia", "rss.googleNews"]` | Topic sources; at least one. Also accepts `gmya` and `wikihow`. | `CONFIG_SEARCH_QUERY_ENGINES`                                   |
+| `gmyaPlatforms`           | Not set (`gmya` uses `["BaiduHot"]`)                 | GMYA platform names to fetch topics from; accepts multiple.     | -                                                               |
 | `scrollRandomResults`     | `false`                                              | Optional results-page scrolling in browser mode.                | `CONFIG_SEARCH_SCROLL_RANDOM`                                   |
 | `clickRandomResults`      | `false`                                              | Optional result visits in browser mode.                         | `CONFIG_SEARCH_CLICK_RANDOM`                                    |
 | `searchResultVisitTime`   | `"10sec"`                                            | Time spent on an optional result visit.                         | `CONFIG_SEARCH_VISIT_TIME`                                      |
@@ -357,6 +358,8 @@ Set these fields inside `searchSettings`.
 | Value                                 | Topics                                                    |
 | ------------------------------------- | --------------------------------------------------------- |
 | `google`                              | Google trend topics.                                      |
+| `gmya`                                | GMYA trending topics from the configured `gmyaPlatforms`. |
+| `wikihow`                             | WikiHow featured topics.                                  |
 | `local`                               | Bundled [local queries](../src/data/search-queries.json). |
 | `wikipedia`                           | Wikipedia topic source.                                   |
 | `wikirandom`                          | Random Wikipedia topics.                                  |
@@ -368,6 +371,19 @@ Set these fields inside `searchSettings`.
 | `rss.bbc.technology`                  | One named feed.                                           |
 
 RSS selectors follow `rss`, `rss.<site>` or `rss.<site>.<feed>`; see the [feed list](../src/constants/rssFeeds.ts).
+
+For GMYA, set `gmya` in `queryEngines` and optionally choose one or more platforms. For example:
+
+```json
+{
+    "searchSettings": {
+        "queryEngines": ["google", "gmya", "wikihow", "local", "wikipedia", "rss.googleNews"],
+        "gmyaPlatforms": ["BaiduHot", "TouTiaoHot", "WeiBoHot", "SoHot"]
+    }
+}
+```
+
+If `gmyaPlatforms` is omitted, GMYA uses `BaiduHot`.
 
 - `useAccountLocale=false` uses English/US query preferences.
 - A source can return another language or have unknown language metadata.
